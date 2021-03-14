@@ -107,8 +107,13 @@ public:
     else{
       displayValue = value;
       hand += "Your hand: ";
+<<<<<<< HEAD
       for(std::string card : cards)
         hand += card + ' ';
+=======
+      for(int i = 0; i < cards.size(); i++)
+        hand += cards[i] + ' ';
+>>>>>>> 9ea3a37549b3befb303ac6d3bd293d7f01c7cdd7
     }
     hand += "\nValue of hand - " + std::to_string(displayValue) + "\n\n";
     return hand;
