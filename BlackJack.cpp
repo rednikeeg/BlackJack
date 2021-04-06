@@ -107,13 +107,8 @@ public:
     else{
       displayValue = value;
       hand += "Your hand: ";
-<<<<<<< HEAD
       for(std::string card : cards)
         hand += card + ' ';
-=======
-      for(int i = 0; i < cards.size(); i++)
-        hand += cards[i] + ' ';
->>>>>>> 9ea3a37549b3befb303ac6d3bd293d7f01c7cdd7
     }
     hand += "\nValue of hand - " + std::to_string(displayValue) + "\n\n";
     return hand;
@@ -156,9 +151,59 @@ public:
   }
 };
 
+class Game{
+private:
+  Hand player, dealer;
+  int money, currentStake, minimalStake, bid;
+  std::string answer;
+public:
+  void shuffle(){
+
+    formDeck();
+
+    dealer.dealer();
+
+    do{
+      std::cout << "Currently you have " << money << "$.\nHow many you wanna bit to start game?\n";
+      std::cin >> bid;
+
+      if(!std::cin){
+        std::cout << "Don't input symbols!\n";
+        continue;
+      }
+      else if(bid <= money && bid >= minimalStake){
+        currentStake = bid;
+        break;
+      }
+      else{
+        std::cout << "You can't bit such amount of money - " << bid << ", minimal stake - " << minimalStake << ".\n";
+        continue;
+      }
+    }while(true);
+  }
+
+  void win(){
+    money += currentStake;
+  }
+
+  void lost(){
+    money -= currentStake;
+  }
+
+  bool end(){
+    return money <= 0;
+  }
+
+  Game(unsigned int min = 50, unsigned int mon = 500){
+    money = mon;
+    minimalStake = min;
+  }
+
+};
+
 int main(){
 
-  formDeck();
+  Game blackjack;
 
   std::string answer;
 
@@ -168,52 +213,64 @@ int main(){
 
   std::cout << "Welcome to Black Jack!\n";
 
-  dealer.start();
-  player.start();
+  do{
+    formDeck();
 
-  std::cout << dealer.show() << player.show() << '\n';
+    blackjack.shuffle();
 
-  //Making final hand for dealer
-  while(dealer.value < 16)
+    dealer.start();
+    player.start();
+
+    std::cout << dealer.show() << player.show() << '\n';
+
+    //Making final hand for dealer
+    while(dealer.value < 16)
     dealer.newCard();
 
-  while(!player.defeat && player.value != 21){
-    //Player's move
-    do {
-      std::cout << "Hit or stand?\n";
-      std::cin >> answer;
-    }
-    while(answer[0] != 'h' && answer[0] != 's');
+    while(!player.defeat && player.value != 21){
+      //Player's move
+      do {
+        std::cout << "Hit or stand?\n";
+        std::cin >> answer;
+      }
+      while(answer[0] != 'h' && answer[0] != 's');
 
-    if(answer[0] == 'h')
+      if(answer[0] == 'h')
       player.newCard();
-    else
+      else
       break;
-    //Game at the moment
-    std::cout << dealer.show() << player.show();
-
-  }
-
-  std::cout << dealer.lastShow() << player.lastShow() << '\n';
-
-  //Defeat
-  if(player.defeat || (player.value < dealer.value && !dealer.defeat))
-    std::cout << "You've lost.\n";
-  //Endgame by blackjack
-  else if(player.value == dealer.value) {
-    if(!player.blackjack && dealer.blackjack){
-      std::cout << "Values of hands are the same, but dealer got the blackjack.\nYou've last.\n";
+      //Game at the moment
+      std::cout << dealer.show() << player.show();
     }
-    else if (player.blackjack && !dealer.blackjack){
-      std::cout << "Values of hands are the same, but you got the blackjack.\nYou've won.\n";
+    std::cout << dealer.lastShow() << player.lastShow() << '\n';
+
+    //Defeat
+    if(player.defeat || (player.value < dealer.value && !dealer.defeat)){
+      std::cout << "You've lost.\n";
+      blackjack.lost();
     }
+    //Endgame by blackjack
+    else if(player.value == dealer.value) {
+      if(!player.blackjack && dealer.blackjack){
+        std::cout << "Values of hands are the same, but dealer got the blackjack.\nYou've lost.\n";
+        blackjack.lost();
+      }
+      else if (player.blackjack && !dealer.blackjack){
+        std::cout << "Values of hands are the same, but you got the blackjack.\nYou've won.\n";
+        blackjack.win();
+      }
+      else{
+        std::cout << "It's draw.\n";
+      }
+    }
+    //Victory
     else{
-      std::cout << "It's draw.\n";
+      std::cout << "You've won.\n";
+      blackjack.win();
     }
-  }
-  //Victory
-  else{
-    std::cout << "You've won.\n";
-  }
+  }while(!blackjack.end());
+
+  std::cout << "You have no money";
+
   return 0;
 }
